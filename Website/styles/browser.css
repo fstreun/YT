@@ -1,0 +1,65 @@
+
+#browser {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#browser .list {
+  width: 1000px;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#browser .list .list_item {
+  margin: 5px;
+  display: flex;
+
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#browser .list .list_item .thumbnail {
+  margin-left: 0px;
+  margin-right: 5px;
+}
+
+#browser .list .list_item.channel .thumbnail {
+  border-radius: 50%;
+}
+
+#browser .list .list_item.playlist .thumbnail {
+  border-radius: 20%;
+}
+
+#browser .list .list_item .info {
+  flex-grow: 1;
+  margin-left: 5px;
+  margin-right: 5px;
+  overflow: hidden;
+}
+
+
+#browser .list .list_item .info .title{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#browser .list .list_item .right {
+  white-space: nowrap;
+}
+
+#browser .list .list_item .right > * {
+  padding: 10px;
+}
+
+#browser .list .list_item .item-hover {
+  visibility: hidden;
+}
+
+#browser .list .list_item:hover .item-hover {
+  visibility: visible;
+}

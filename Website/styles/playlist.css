@@ -1,0 +1,103 @@
+
+
+#player_playlist{
+  overflow-y: auto;
+}
+
+#player_playlist>.list{
+  width: 800px;
+  max-width: 100%;
+  height: 100%;
+
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#player_playlist>.list>.list_item{
+  margin: 5px;
+  display: flex;
+
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#player_playlist>.list>.list_item.dragged{
+  background-color: black;
+  opacity: 0.2;
+}
+
+
+/*
+  all above current video
+*/
+#player_playlist>.list>.list_item{
+  color: grey;
+}
+#player_playlist>.list>.list_item:hover{
+  color: grey;
+}
+
+/*
+  current video
+*/
+#player_playlist>.list>.list_item.current_video{
+  background: grey;
+  color: white;
+}
+#player_playlist>.list>.list_item.current_video:hover{
+  background: grey;
+  color: white;
+}
+
+/*
+  all after current video
+*/
+#player_playlist>.list>.list_item.current_video ~ .list_item{
+  background: black;
+  color:white;
+}
+
+#player_playlist>.list>.list_item.current_video ~ .list_item:hover{
+}
+
+
+/*
+  List Item
+*/
+
+#player_playlist>.list>.list_item .thumbnail{
+  margin-left: 0px;
+  margin-right: 5px;
+}
+
+#player_playlist>.list>.list_item .info{
+  margin-left: 5px;
+  margin-right: 5px;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+#player_playlist>.list>.list_item .info .title{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#player_playlist>.list>.list_item .right{
+  white-space: nowrap;
+}
+
+#player_playlist>.list>.list_item .right > *{
+  padding: 10px;
+}
+
+
+#player_playlist>.list>.list_item .item-hover{
+  visibility: hidden;
+}
+
+#player_playlist>.list>.list_item:hover .item-hover{
+  visibility: visible;
+}

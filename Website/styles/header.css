@@ -1,0 +1,41 @@
+
+header {
+
+  color: white;
+  font-size: 150%;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .icon {
+  flex-basis: 0;
+  margin: 15px;
+}
+
+header #search_bar{
+  flex-basis: 0;
+  flex-grow: 1;
+  max-width: 600px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-content: center;
+}
+
+header #search_bar input {
+  padding: 5px;
+  color: white;
+  font-size: 60%;
+
+  background-color: inherit;
+  border: 2px solid gray;
+
+  flex-grow: 1;
+
+}

@@ -1,0 +1,93 @@
+
+
+body {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  font-size: 150%;
+}
+
+header {
+  width: 100%;
+
+  background-color: black;
+}
+
+main {
+  width: 100%;
+
+  flex-grow: 1;
+  flex-basis: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+#browser {
+  width: 100%;
+
+  flex-grow: 1;
+  flex-basis: 0;
+
+  background-color: white;
+  transition: 0.5s;
+}
+
+#player {
+  width: 100%;
+
+  flex-grow: 0;
+
+  color: white;
+  background-color: black;
+  transition: 0.5s;
+}
+
+main.player_expanded > #browser {
+  height: 0;
+
+  flex-grow: 0;
+  transition: 0.5s;
+}
+
+main.player_expanded > #player {
+  height: 100%;
+
+  flex-grow: 1;
+  flex-basis: 0;
+
+  transition: 0.5s;
+}
+
+
+/* #################### SCROLLBAR ##################*/
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+
+/********************* MOUSE POINTER ****************/
+
+.mouse-pointer:hover {
+  cursor: pointer;
+}
+
