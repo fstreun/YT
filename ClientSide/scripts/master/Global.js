@@ -12,10 +12,9 @@ Initialization of components, which have to be called on window onload.
 
 
 
-
 "use strict";
 (function(){
-  const MAINSRC = "scripts/share/socket.io/MainControllerSocketIO.js";
+  const MAINSRC = "scripts/master/socket.io/MainControllerSocketIO.js";
 
   window.addEventListener("load", function(){
     YTBrowser.init();

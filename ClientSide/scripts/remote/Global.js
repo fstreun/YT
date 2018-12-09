@@ -16,7 +16,7 @@ Initialization of components, which have to be called on window onload.
 "use strict";
 (function(){
 
-  const REMOTESRC = "scripts/share/socket.io/RemoteControllerSocketIO.js";
+  const REMOTESRC = "scripts/remote/socket.io/RemoteControllerSocketIO.js";
 
 
   window.addEventListener("load", function(){
