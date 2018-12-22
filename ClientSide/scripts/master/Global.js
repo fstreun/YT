@@ -29,8 +29,8 @@ Initialization of components, which have to be called on window onload.
 
       // TODO: hope MainPlayer is already initialized!
       MainControllerSocketIO.init(MainPlayer, MainPlaylist);
-      MainPlayer.setMainController(MainControllerSocketIO);
-      MainPlaylist.setMainController(MainControllerSocketIO);
+      //MainPlayer.setMainController(MainControllerSocketIO);
+      //MainPlaylist.setMainController(MainControllerSocketIO);
     }
     let firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);

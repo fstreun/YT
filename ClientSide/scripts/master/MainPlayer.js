@@ -2,12 +2,20 @@
 Name: Fabio Streun
 Date: 17/08/2018
 
+MainPlayer is a Player interface (e.g. used by YTBrowser.js).
+
+It uses a Playlist and controls the YTPlayer.
+
+If a mainController (sends data to the server) it sends data
+in the following cases:
+dataChange, stateChange, timeChange
 */
 
 
 
 "use strict";
 let MainPlayer = function() {
+  let playlist = null;
 
   const TIMEBARMAX = 1000;
 
@@ -39,6 +47,10 @@ let MainPlayer = function() {
     $("player_timebar").value = 0;
   }
 
+  function setPlaylist(newPlaylist){
+    playlist = newPlaylist;
+  }
+
   function setMainController(newMainController){
     mainController = newMainController;
   }
@@ -61,7 +73,7 @@ let MainPlayer = function() {
    * Loads next video in the Playlist
    */
   function forward(){
-    let data = MainPlaylist.forward();
+    let data = playlist.forward();
     if (data != null){
       dataChange(data);
       loadById(data.id);
@@ -72,7 +84,7 @@ let MainPlayer = function() {
    * Load previous video from the Playlist
    */
   function backward(){
-    let data = MainPlaylist.backward();
+    let data = playlist.backward();
     if (data != null){
       dataChange(data);
       loadById(data.id);
@@ -141,18 +153,26 @@ let MainPlayer = function() {
 
   function dataChange(newData){
     videoData = newData;
-    mainController.dataChange(newData);
+    if(mainController){
+      mainController.dataChange(newData);
+    }
     updateText(videoData);
   }
 
   function stateChange(newState){
     state = newState;
-    mainController.stateChange(state);
+    
+    if(mainController){
+      mainController.stateChange(state);
+    }
     updatePlayButton(state);
   }
 
   function timeChange(time, duration){
-    mainController.timeChange(time, duration);
+
+    if(mainController){
+      mainController.timeChange(time, duration);
+    }
     updateTimebar(time, duration);
   }
 
@@ -205,6 +225,7 @@ let MainPlayer = function() {
     backward:backward,
     seekTo:seekTo,
     stateChanged:stateChanged,
+    setPlaylist:setPlaylist,
     setMainController:setMainController
   };
 

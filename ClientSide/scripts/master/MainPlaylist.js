@@ -2,14 +2,13 @@
 Name: Fabio Streun
 Date: 09/09/2018
 
-Main Playlist controlls the current playlist running.
+Main Playlist is a Playlist interface (e.g. used by YTBrowser).
 
-Public methods:
-cueEnd(data)
-cueAfterCurrent(data)
-forward()
-backward()
-getCurrentVideo()
+It controls and is controlled by the player.
+
+If a mainController (sends data to the server) it sends data
+in the following cases:
+changes to the playlist, current song changes
 */
 
 
@@ -31,10 +30,12 @@ let MainPlaylist = function() {
 
   /**
    * Initializes the MainPlaylist.
+   * Sets the playlist of the player to this.
    * @param {MainPlayer} newPlayer to be called on playlist item events.
    */
   function init(newPlayer){
     player = newPlayer;
+    player.setPlaylist(this);
   }
 
   function setMainController(newMainController){
@@ -59,7 +60,9 @@ let MainPlaylist = function() {
       current--;
     }
 
-    mainController.removeFromPlaylist(itemId);
+    if (mainController){
+      mainController.removeFromPlaylist(itemId);
+    }
   }
 
   function removeRequest(itemId){
@@ -90,7 +93,9 @@ let MainPlaylist = function() {
         current = newPosition;
       }
 
-      mainController.moveInPlaylist(itemId, newPosition);
+      if (mainController){
+        mainController.moveInPlaylist(itemId, newPosition);
+      }
     }
   }
 
@@ -109,7 +114,9 @@ let MainPlaylist = function() {
     dataMap.set(id, data);
     domMap.set(id, dom);
 
-    mainController.addToPlaylist(data, id, position);
+    if (mainController){
+      mainController.addToPlaylist(data, id, position);
+    }
 
     return id;
   }
@@ -129,7 +136,9 @@ let MainPlaylist = function() {
     dataMap.set(id, data);
     domMap.set(id, dom);
 
-    mainController.addToPlaylist(data, id, playlistOrder.length-1);
+    if (mainController){
+      mainController.addToPlaylist(data, id, playlistOrder.length-1);
+    }
 
     return id;
   }
@@ -151,8 +160,9 @@ let MainPlaylist = function() {
     dataMap.set(id, data);
     domMap.set(id, dom);
 
-    mainController.addToPlaylist(data, id, current+1);
-
+    if (mainController){
+      mainController.addToPlaylist(data, id, current+1);
+    }
     return id;
   }
 
@@ -168,7 +178,9 @@ let MainPlaylist = function() {
 
       scrollToCurrent();
 
-      mainController.setCurrent(current);
+      if (mainController){
+        mainController.setCurrent(current);
+      }
 
       return dataMap.get(playlistOrder[current]);
     }else{
@@ -188,8 +200,9 @@ let MainPlaylist = function() {
 
       scrollToCurrent();
 
-      mainController.setCurrent(current);
-
+      if (mainController){
+        mainController.setCurrent(current);
+      }
       return dataMap.get(playlistOrder[current]);
     } else {
       return null;

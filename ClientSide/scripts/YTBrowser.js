@@ -9,14 +9,7 @@ Date: 17/08/2018
 "use strict";
 let YTBrowser = function() {
 
-  let player = null;
-  let playlist = null;
-
-  /**
-   * Initialze the listeners for the search field.
-   * Should be called after the window is loaded (window.onload).
-   */
-  function init(){
+  window.addEventListener("load", function(){
     clear();
     $("search_btn").onclick = searchClicked;
     $("search_input").addEventListener("keyup", function(event){
@@ -25,15 +18,7 @@ let YTBrowser = function() {
         $("search_btn").click();
       }
     });
-  }
-
-  function setPlaylist(newPlaylist){
-    playlist = newPlaylist;
-  }
-
-  function setPlayer(newPlayer){
-    player = newPlayer;
-  }
+  });
 
   function searchClicked(){
     let q = $("search_input").value;
@@ -130,7 +115,14 @@ let YTBrowser = function() {
     addFront.classList.add("option", "fas", "fa-plus-circle");
     addFront.addEventListener("click", function(event){
       event.stopPropagation();
-      playlist.cueAfterCurrent(data);
+          clear();
+    $("search_btn").onclick = searchClicked;
+    $("search_input").addEventListener("keyup", function(event){
+      event.preventDefault();
+      if(event.keyCode === 13){
+        $("search_btn").click();
+      }
+    });PlayerController.cueAfterCurrent(data);
     });
     right.appendChild(addFront);
 
@@ -139,7 +131,7 @@ let YTBrowser = function() {
     addBack.classList.add("option", "fas", "fa-level-down-alt");
     addBack.addEventListener("click", function(event){
       event.stopPropagation();
-      playlist.cueEnd(data);
+      PlayerController.cueEnd(data);
     });
     right.appendChild(addBack);
 
@@ -147,8 +139,8 @@ let YTBrowser = function() {
 
     item.addEventListener("click", function(event){
       event.stopPropagation();
-      playlist.cueAfterCurrent(data);
-      player.forward();
+      PlayerController.cueAfterCurrent(data);
+      PlayerController.forward();
     });
 
     return item;
@@ -214,8 +206,6 @@ let YTBrowser = function() {
 
 
   return {
-    init:init,
-    setPlayer:setPlayer,
-    setPlaylist:setPlaylist
+    init:init
   }
 }();
