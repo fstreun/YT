@@ -8,7 +8,7 @@ Date: 08/09/2018
 
 let MainControllerSocketIO = function() {
 
-  const HOST = "http://localhost:3000";
+  const HOST = "http://fstreun.vsos.ethz.ch:3000";
 
   let masterSocket = null;
 

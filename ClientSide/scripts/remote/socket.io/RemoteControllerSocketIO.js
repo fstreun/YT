@@ -8,7 +8,7 @@ Date: 08/09/2018
 
 let RemoteControllerSocketIO = function() {
 
-  const HOST = "http://localhost:3000";
+  const HOST = "http://fstreun.vsos.ethz.ch:3000";
 
   let remoteSocket = null;
 
@@ -21,7 +21,7 @@ let RemoteControllerSocketIO = function() {
 
     // 2. This code loads code
     let tag = document.createElement('script');
-    tag.src = "http://localhost:3000/socket.io/socket.io.js";
+    tag.src = HOST + "/socket.io/socket.io.js";
     tag.onload = function(){
       initSockets();
     }
