@@ -30,6 +30,20 @@
 
     <script src="scripts/PlayerController.js"></script>
     
+    <script src="scripts/master/MasterPlayer.js"></script>
+    <script src="scripts/master/MasterPlaylist.js"></script>
+    
+    <script>
+      (function(){
+
+        window.addEventListener("load", function () {
+          PlayerController.setBackEnd(MasterPlayer, MasterPlaylist);
+        }
+    );
+
+      })();
+    </script>
+    
   </head>
   <body>
 
