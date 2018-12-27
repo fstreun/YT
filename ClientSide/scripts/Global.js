@@ -36,3 +36,7 @@ return document.querySelector(selector);
 function qsa(selector) {
 return document.querySelectorAll(selector);
 }
+
+function insertAfter(newNode, referencedNode){
+    return referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
