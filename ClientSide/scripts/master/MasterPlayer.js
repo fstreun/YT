@@ -1,37 +1,38 @@
 
 "use strict";
-const MasterPlayer = function() {
+const MasterPlayer = function () {
     let remote = null;
     let YTPlayer = null;
 
-    function setYTPlayer(ytplayer){
+    function setYTPlayer(ytplayer) {
         YTPlayer = ytplayer;
+        console.log("YouTube player binded to MasterPlayer")
     }
 
-    function setRemote(newRemote){
+    function setRemote(newRemote) {
         remote = newRemote;
     }
 
-    function play(){
+    function play() {
         YTPlayer.playVideo();
     }
 
-    function pause(){
+    function pause() {
         YTPlayer.pauseVideo();
     }
 
-    function seekTo(newTime){
+    function seekTo(newTime) {
         YTPlayer.seekTo(newTime);
     }
 
-    function loadVideo(data, itemId){
-        player.loadVideoById(data.id, 0, "large");
+    function loadVideo(data, itemId) {
+        YTPlayer.loadVideoById(data.id, 0, "large");
 
         // because not listening for response
         // must call response itself
-        PlayerController.dataChange(data);
-        if (remote){
-            remote.dataChange(itemId);
+        PlayerController.videoChange(data, itemId);
+        if (remote) {
+            remote.videoChange(data, itemId);
         }
     }
 
@@ -42,10 +43,13 @@ const MasterPlayer = function() {
         pause,
         seekTo,
         loadVideo,
+
+        stateChange,
+        timeChange
     };
 
     // YTPlayer calls this!
-    function stateChanged(playerStatus){
+    function stateChange(playerStatus) {
         let state = 0;
         if (playerStatus == -1) {
             // unstarted
@@ -69,16 +73,54 @@ const MasterPlayer = function() {
         }
 
         PlayerController.stateChange(state);
-        if(remote){
+        if (remote) {
             remote.stateChange(state);
         }
     }
 
-    function timeChanged(newTime, duration){
+    function timeChange(newTime, duration) {
 
         PlayerController.timeChange(newTime, duration);
-        if (remote){
+        if (remote) {
             remote.timeChange(newTime, duration);
         }
     }
-};
+}();
+
+
+(function () {
+    window.addEventListener("load", function () {
+        // 2. This code loads the IFrame Player API code asynchronously.
+        let tag = document.createElement('script');
+
+        tag.src = "https://www.youtube.com/iframe_api";
+        let firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+    );
+})();
+
+// 3. This function creates an <iframe> (and YouTube player)
+//    after the API code downloads.
+function onYouTubeIframeAPIReady() {
+    let player = new YT.Player('player_video', {
+        height: '200',
+        width: '200',
+        playerVars: {
+            'controls': 0,
+            'color': "white"
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': function (event) {
+                MasterPlayer.stateChange(event.data);
+            }
+        }
+    });
+    MasterPlayer.setYTPlayer(player);
+}
+
+// 4. The API will call this function when the video player is ready.
+function onPlayerReady(event) {
+
+}
