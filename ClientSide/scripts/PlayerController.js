@@ -7,17 +7,17 @@ const PlayerController = function() {
     let playlist = null;
 
 
+    window.addEventListener("load", function () {
+            $("play_button").onclick = playButtonClicked;
+            $("play_button_bwd").onclick = backwardClicked;
+            $("play_button_fwd").onclick = forwardClicked;
+        
+            let playerTimeBar = $("player_timebar");
+            $("player_timebar").onchange = timebarChanged;
+        
+            $("player_timebar").value = 0;
+    });
 
-    function init(){
-        $("play_button").onclick = playButtonClicked;
-        $("play_button_bwd").onclick = backwardClicked;
-        $("play_button_fwd").onclick = forwardClicked;
-    
-        let playerTimeBar = $("player_timebar");
-        $("player_timebar").onchange = timebarChanged;
-    
-        $("player_timebar").value = 0;
-    }
 
     function setBackEnd(newPlayer, newPlaylist){
         player = newPlayer;
@@ -35,6 +35,10 @@ const PlayerController = function() {
             // playing
             pause();
         }
+    }
+
+    function timebarChanged(){
+
     }
 
     function play(){
@@ -55,6 +59,12 @@ const PlayerController = function() {
         }
     }
 
+    function loadVideo(data, itemId){
+        if(player){
+            player.loadVideo(data, itemId);
+        }
+    }
+
 
     // player should call this if state changed!
     function stateChange(newState){
@@ -69,25 +79,21 @@ const PlayerController = function() {
     }
 
     // player should call this if data changes!
-    function dataChange(itemId){
-        let data = dataMap.get(itemId);
+    function videoChange(data, itemId){
         updateText(data);
+        setCurrent(itemId);
     }
 
     //########### PLAYLIST
-    const dataMap = new Map();  // maps itemId to video data
-    const domMap = new Map();   // maps itemId to dom element
-  
-    const playlistOrder = new Array();  // array of ordered itemIds
-    let current = -1;
 
+    const domMap = new Map();   // maps itemId to dom element
 
     function forwardClicked(){
-        playlist.forward();
+        playlist.forwardClicked();
     }
 
     function backwardClicked(){
-        playlist.backward();
+        playlist.backwardClicked();
     }
 
     function cueAt(data, position){
@@ -95,93 +101,59 @@ const PlayerController = function() {
     }
 
     function cueAfterCurrent(data){
-        playlist.cueAt(data, current+1);
+        playlist.cueAfterCurrent(data);
     }
 
     function cueEnd(data){
-        playlist.cueAt(data, playlistOrder.length);
+        playlist.cueEnd(data);
     }
 
     function playVideoClicked(itemId){
-        playlist.playVideo(itemId)
+        playlist.playVideoClicked(itemId)
     }
 
     function removeVideoClicked(itemId){
-        playlist.remove(itemId);
+        playlist.removeVideoClicked(itemId);
     }
 
-    function movePerfomed(itemId, newPosition){
-        playlist.move(itemId, newPosition);
+    function moveVideoPerformed(itemId, newPosition){
+        playlist.moveVideoPerformed(itemId, newPosition);
     }
 
 
     //######## responses
 
-    function forward(){
-        const next = playlistOrder[current];
+    function addAfter(itemId, data, referenceId){
+        const dom = newPlaylistItem(itemId, data);
+        domMap.set(itemId, dom);
+
+        const list = qs("#player_playlist>.list");
+        insertAfter(list, dom, domMap.get(referenceId))
     }
 
-    // playlist should call this
-    function playVideo(itemId){
-        current = playlistOrder.indexOf(itemId);
-        setCurrentClass();
-        player.loadVideo(dataMap.get(itemId), itemId)
+    function addBefore(itemId, data, referenceId){
+        const dom = newPlaylistItem(itemId, data);
+        domMap.set(itemId, dom);
+
+        const list = qs("#player_playlist>.list");
+        list.insertBefore(dom, domMap.get(referenceId))
     }
 
-    // playlist should call this
-    function addVideo(data, itemId, position){
-        let dom = newPlaylistItem(itemId, data);
-        let list = qs("#player_playlist>.list");
-
-        list.insertBefore(dom, domMap.get(playlistOrder[position]));
-    
-        playlistOrder.splice(position, 0, id);
-        dataMap.set(id, data);
-        domMap.set(id, dom);
-    }
-
-    // playlist should call this
     function removeVideo(itemId){
-        // remove from dom
-        let item = domMap.get(itemId);
-        item.parentNode.removeChild(item);
-    
-        let position = playlistOrder.indexOf(itemId);
-        playlistOrder.splice(position, 1);
-        dataMap.delete(itemId);
+        const dom = domMap.get(itemId);
+        dom.parentNode.removeChild(dom);
+
         domMap.delete(itemId);
-        if (position < current){
-          current--;
-        }
     }
 
-    /** Playlist should call this
-     * Moves a tiem to a new position in the playlist.
-     * The item has to be already in the playlist.
-     * @param {Number} itemId of the item to be moved
-     * @param {Number} newPosition of the item
-     */
-    function moveVideo(itemId, newPosition){
-        let position = playlistOrder.indexOf(itemId);
-        if (!(position == newPosition)){
-          playlistOrder.splice(position, 1);
-          playlistOrder.splice(newPosition, 0, itemId);
-    
-          let dom = domMap.get(itemId);
-          let after = domMap.get(playlistOrder[newPosition+1]);
-          dom.parentNode.insertBefore(dom, after);
-          
-          if (position > current && newPosition <= current){
-            current++;
-          } else if (position < current && newPosition > current){
-            current --;
-          } else if (position == current){
-            current = newPosition;
-          }
+    function moveVideoBefore(itemId, toItemId){
+        if(itemId != toItemId){
+            const dom = domMap.get(itemId);
+            const to = domMap.get(toItemId);
+
+            dom.parentNode.insertBefore(dom, to);
         }
     }
-    
-    
 
 
     function newPlaylistItem(itemId, data){
@@ -243,7 +215,7 @@ const PlayerController = function() {
             MoveControl.itemDragEnter(e, itemId);
             }, false);
         item.addEventListener("dragover", function(e){
-            itemDragOver(e, itemId);
+            MoveControl.itemDragOver(e, itemId);
             }, false);
         item.addEventListener("dragleave", function(e){
             MoveControl.itemDragLeave(e, itemId);
@@ -255,7 +227,7 @@ const PlayerController = function() {
         return item;
     }
 
-    let MoveControl = function(){
+    const MoveControl = function(){
 
         let draggedID = null;
 
@@ -276,8 +248,7 @@ const PlayerController = function() {
             //e.target.classList.add("dragged-over")
         
             if (!(draggedID == itemId)){
-            let newPosition = playlistOrder.indexOf(itemId);
-            movePerfomed(draggedID, newPosition);
+            moveVideoPerformed(draggedID, itemId);
             }
         }
         
@@ -293,8 +264,7 @@ const PlayerController = function() {
             if (draggedID != null){
             e.preventDefault();
         
-            let newPosition = playlistOrder.indexOf(itemId);
-            movePerfomed(draggedID, newPosition);
+            moveVideoPerformed(draggedID, itemId);
             }
         }
 
@@ -311,18 +281,18 @@ const PlayerController = function() {
 
 
     return {
-        init:init,
         setBackEnd:setBackEnd,
         
         // requests
         play:play,
         pause:pause,
         seekTo:seekTo,
+        loadVideo:loadVideo,
 
         // actions
         stateChange:stateChange,
         timeChange:timeChange,
-        dataChange:dataChange,
+        videoChange:videoChange,
 
         // requests
         forwardClicked:forwardClicked,
@@ -330,14 +300,15 @@ const PlayerController = function() {
         cueAt:cueAt,
         cueAfterCurrent:cueAfterCurrent,
         cueEnd:cueEnd,
+        playVideoClicked:playVideoClicked,
         removeVideoClicked:removeVideoClicked,
-        movePerfomed:movePerfomed,
+        moveVideoPerformed:moveVideoPerformed,
 
         // actions
-        playVideo:playVideo,
-        addVideo:addVideo,
+        addAfter:addAfter,
+        addBefore:addBefore,
         removeVideo:removeVideo,
-        moveVideo:moveVideo
+        moveVideoBefore:moveVideoBefore
 
     };
 
@@ -357,14 +328,11 @@ const PlayerController = function() {
           btn.classList.remove("fa-pause");
           btn.classList.add("fa-play");
     
-          clearInterval(timeInterval);
         }else if (state == 1){
           // playing
           btn.classList.remove("fa-play");
           btn.classList.add("fa-pause");
     
-          clearInterval(timeInterval);
-          timeInterval = setInterval(timebarFunction, 500);
         }
     }
 
@@ -372,12 +340,8 @@ const PlayerController = function() {
         $("player_timebar").value = ((currentTime/duration)*TIMEBARMAX);
     }    
 
-    function setCurrentClass(){
-        let old = qs("#player_playlist>.list>.list_item.current_video");
-        if (old){
-          old.classList.remove("current_video");
-        }
-        domMap.get(playlistOrder[current]).classList.add("current_video");
+    function setCurrent(itemId){
+
     }
     
       /**
