@@ -11,13 +11,15 @@ let MainControllerSocketIO = function() {
   const HOST = "http://localhost:3000";
 
   let masterSocket = null;
+  let masterId = null;
 
   let mainPlayer = null;
   let mainPlaylist = null;
 
-  function init(newMainPlayer, newMainPlaylist){
+  function init(newMainPlayer, newMainPlaylist, newMasterId){
     mainPlayer = newMainPlayer;
     mainPlaylist = newMainPlaylist;
+    masterId = newMasterId;
 
     // 2. This code loads code
     let tag = document.createElement('script');
@@ -33,6 +35,10 @@ let MainControllerSocketIO = function() {
     mainPlaylist.setRemote(MainControllerSocketIO);
 
     masterSocket = io(HOST + "/masters");
+
+    masterSocket.on("connect", function(msg){
+      masterSocket.emit("masterId", masterId);
+    });
 
     masterSocket.on("play", function(msg){
       play();

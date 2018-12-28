@@ -11,13 +11,20 @@ const RemoteControllerSocketIO = function() {
   const HOST = "http://localhost:3000";
 
   let remoteSocket = null;
+  let masterId = null;
 
   let remotePlayer = null;
   let remotePlaylist = null;
 
-  function init(newRemotePlayer, newRemotePlaylist){
+  function init(newRemotePlayer, newRemotePlaylist, newMasterId){
+    if (remoteSocket){
+      remoteSocket.close();
+      remoteSocket = null;
+    }
+
     remotePlayer = newRemotePlayer;
     remotePlaylist = newRemotePlaylist;
+    masterId = newMasterId;
 
     // 2. This code loads code
     let tag = document.createElement('script');
@@ -36,6 +43,10 @@ const RemoteControllerSocketIO = function() {
   function initSockets(){
 
     remoteSocket = io(HOST + "/remotes");
+
+    remoteSocket.on('connect', function(msg){
+      remoteSocket.emit('joinMaster', masterId);
+    });
 
     remoteSocket.on("videoChange", function(msg){
       videoChange(msg);

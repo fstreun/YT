@@ -40,7 +40,7 @@
 
         window.addEventListener("load", function () {
           PlayerController.setBackEnd(MasterPlayer, MasterPlaylist);
-          MainControllerSocketIO.init(MasterPlayer, MasterPlaylist);
+          MainControllerSocketIO.init(MasterPlayer, MasterPlaylist, "test");
         }
     );
 
@@ -61,7 +61,9 @@
           <input type="text" placeholder="Search" id="search_input">
           <button id="search_btn"><i class="fa fa-search"></i></button>
         </div>
-        <div class="empty"> </div>
+        <div id="share_btn">
+          <span class="fas fa-share-alt"></span>
+        </div>
     </header>
 
 
