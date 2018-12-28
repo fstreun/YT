@@ -15,6 +15,7 @@ const MasterPlaylist = function () {
 
     let itemIdCounter = 0;
 
+
     function forwardClicked() {
         if (current < playlistOrder.length - 1) {
             current++;
@@ -43,46 +44,19 @@ const MasterPlaylist = function () {
         }
     }
 
-    function cueAt(data, position) {
+    function cueVideoRequest(data, position) {
         const itemId = itemIdCounter++;
-
-        playlistOrder.splice(position, 0, itemId);
-        dataMap.set(itemId, data);
-
-        const beforeId = playlistOrder[position + 1];
-
-        PlayerController.addBefore(itemdId, data, beforeId)
-        if (remote) {
-            remote.addBefore(itemId, data, beforeId);
-        }
+        cueVideo(itemId, data, position);
     }
 
-    function cueAfterCurrent(data) {
-        const itemId = itemIdCounter++;
+    function cueAfterCurrentRequest(data) {
         const position = current + 1;
-
-        const currentId = playlistOrder[current];
-
-
-        playlistOrder.splice(position, 0, itemId);
-        dataMap.set(itemId, data);
-
-        PlayerController.addAfter(itemId, data, currentId); // returns undefined and not null
-        if (remote) {
-            remote.addAfter(itemId, data, currentId);
-        }
+        cueVideoRequest(data, position);
     }
 
-    function cueEnd(data) {
-        const itemId = itemIdCounter++;
-
-        playlistOrder.push(itemId);
-        dataMap.set(itemId, data)
-
-        PlayerController.addBefore(itemId, data, null);
-        if (remote) {
-            remote.addAfter(itemId, data, null);
-        }
+    function cueEndRequest(data) {
+        const position = playlistOrder.length;
+        cueVideoRequest(data, position);
     }
 
     function playVideoClicked(itemId) {
@@ -92,6 +66,32 @@ const MasterPlaylist = function () {
     }
 
     function removeVideoClicked(itemId) {
+        removeVideo(itemId)
+    }
+
+    function moveVideoPerformed(itemId, overItemId) {
+        if (itemId != overItemId) {
+            const newPosition = playlistOrder.indexOf(overItemId);
+            moveVideo(itemId, newPosition);
+        }
+    }
+
+    // ACTIONS
+
+    function cueVideo(itemId, data, position){
+
+        playlistOrder.splice(position, 0, itemId);
+        dataMap.set(itemId, data);
+
+        const beforeId = playlistOrder[position + 1];
+
+        PlayerController.addBefore(itemId, data, beforeId)
+        if (remote) {
+            remote.cueVideo(itemId, data, position);
+        }
+    }
+
+    function removeVideo(itemId){
         PlayerController.removeVideo(itemId);
         if (remote) {
             remote.removeVideo(itemId);
@@ -105,28 +105,32 @@ const MasterPlaylist = function () {
         }
     }
 
-    function moveVideoPerformed(itemId, overItemId) {
-        if (itemId != overItemId) {
-            const oldPosition = playlistOrder.indexOf(itemId);
-            const newPosition = playlistOrder.indexOf(overItemId);
 
-            playlistOrder.splice(oldPosition, 1);
-            playlistOrder.splice(newPosition, 0, itemId);
+    function moveVideo(itemId, newPosition){
+        const oldPosition = playlistOrder.indexOf(itemId);
 
-            if (oldPosition > current && newPosition <= current) {
-                current++;
-            } else if (oldPosition < current && newPosition > current) {
-                current--;
-            } else if (oldPosition == current) {
-                current = newPosition;
-            }
+        playlistOrder.splice(oldPosition, 1);
+        playlistOrder.splice(newPosition, 0, itemId);
 
-            const after = playlistOrder[newPosition+1];
+        if (oldPosition > current && newPosition <= current) {
+            current++;
+        } else if (oldPosition < current && newPosition > current) {
+            current--;
+        } else if (oldPosition == current) {
+            current = newPosition;
+        }
 
-            PlayerController.moveVideoBefore(itemId, after)
-            if(remote){
-                remote.moveVideoBefore(itemId, after);
-            }
+        const after = playlistOrder[newPosition+1];
+
+        PlayerController.moveVideoBefore(itemId, after)
+        if(remote){
+            remote.moveVideo(itemId, newPosition);
+        }
+    }
+
+    function getPlaylist(){
+        if(remote){
+            remote.newPlaylist(playlistOrder, dataMap);
         }
     }
 
@@ -135,11 +139,15 @@ const MasterPlaylist = function () {
         setRemote,
         forwardClicked,
         backwardClicked,
-        cueAt,
-        cueAfterCurrent,
-        cueEnd,
+        cueVideoRequest,
+        cueAfterCurrentRequest,
+        cueEndRequest,
         playVideoClicked,
         removeVideoClicked,
-        moveVideoPerformed
+        moveVideoPerformed,
+        cueVideo,
+        removeVideo,
+        moveVideo,
+        getPlaylist
     };
 }();

@@ -6,7 +6,7 @@ Date: 08/09/2018
 
 "use strict"
 
-let RemoteControllerSocketIO = function() {
+const RemoteControllerSocketIO = function() {
 
   const HOST = "http://localhost:3000";
 
@@ -22,20 +22,23 @@ let RemoteControllerSocketIO = function() {
     // 2. This code loads code
     let tag = document.createElement('script');
     tag.src = "http://localhost:3000/socket.io/socket.io.js";
-    tag.onload = function(){
-      initSockets();
-    }
+    tag.onload = initSockets;
 
     let firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  }
+
+  function initFinished(){
+    remotePlayer.setRemote(RemoteControllerSocketIO);
+    remotePlaylist.setRemote(RemoteControllerSocketIO);
   }
 
   function initSockets(){
 
     remoteSocket = io(HOST + "/remotes");
 
-    remoteSocket.on("dataChange", function(msg){
-      dataChange(msg);
+    remoteSocket.on("videoChange", function(msg){
+      videoChange(msg);
     });
     remoteSocket.on("stateChange", function(msg){
       stateChange(msg);
@@ -44,21 +47,23 @@ let RemoteControllerSocketIO = function() {
       timeChange(t, d);
     });
 
-    remoteSocket.on("addToPlaylist", function(data, itemId, position){
-      addConfirmed(data,itemId, position);
+    remoteSocket.on("cueVideo", function(itemId, data, position){
+      cueVideo(itemId,data, position);
     });
     
-    remoteSocket.on("removeFromPlaylist", function(itemId){
-      removeConfirmed(itemId);
+    remoteSocket.on("removeVideo", function(itemId){
+      removeVideo(itemId);
     });
 
-    remoteSocket.on("moveInPlaylist", function(itemId, newPosition){
-      moveConfirmed(itemId, newPosition);
+    remoteSocket.on("moveVideo", function(itemId, newPosition){
+      moveVideo(itemId, newPosition);
     });
 
-    remoteSocket.on("setCurrent", function(itemId){
-      setCurrent(itemId);
-    });
+    remoteSocket.on("newPlaylist", function(order, map){
+      newPlaylist(order, map);
+    })
+
+    initFinished();
   }
 
   /**
@@ -75,44 +80,53 @@ let RemoteControllerSocketIO = function() {
     remoteSocket.emit("pause", "");
   }
 
-  /**
-   * Loads next video in the Playlist
-   */
-  function forward(){
-    remoteSocket.emit("forward", "");
-  }
-
-  /**
-   * Load previous video from the Playlist
-   */
-  function backward(){
-    remoteSocket.emit("backward", "");
-  }
-
   function seekTo(time){
     remoteSocket.emit("seekTo", time);
   }
 
-  function playVideo(itemId){
-    remoteSocket.emit("playVideo", itemId);
+
+  function forwardClicked(){
+    remoteSocket.emit("forwardClicked", "");
   }
 
-  function addToPlaylist(data, position){
-    remoteSocket.emit("addToPlaylist", data, position);
+  function backwardClicked(){
+    remoteSocket.emit("backwardClicked", "");
   }
 
-  function removeFromPlaylist(itemId){
-    remoteSocket.emit("removeFromPlaylist", itemId);
+  function cueVideoRequest(data, position){
+    remoteSocket.emit("cueVideoRequest", data, position);
   }
 
-  function moveInPlaylist(itemId, newPosition){
-    remoteSocket.emit("moveInPlaylist", itemId, newPosition);
+  function cueAfterCurrentRequest(data){
+    remoteSocket.emit("cueAfterCurrentRequest", data);
   }
 
+  function cueEndRequest(data){
+    remoteSocket.emit("cueEndRequest", data);
+  }
 
+  function playVideoClicked(itemId){
+    remoteSocket.emit("playVideoClicked", itemId);
+  }
+
+  function removeVideoClicked(itemId){
+    remoteSocket.emit("removeVideoClicked", itemId);
+  }
+
+  function moveVideoPerformed(itemId, overItemId){
+    remoteSocket.emit("moveVideoPerformed", itemId, overItemId);
+  }
+
+  function getPlayer(){
+    remoteSocket.emit("getPlayer")
+  }
+
+  function getPlaylist(){
+    remoteSocket.emit("getPlaylist")
+  }
   
-  function dataChange(data){
-    remotePlayer.dataChange(data);
+  function videoChange(data){
+    remotePlayer.videoChange(data);
   }
 
   function stateChange(state){
@@ -124,34 +138,42 @@ let RemoteControllerSocketIO = function() {
   }
 
   
-  function addConfirmed(data, itemId, position){
-    remotePlaylist.addConfirmed(data, itemId, position);
+  function cueVideo(itemId, data, position){
+    remotePlaylist.cueVideo(itemId, data, position);
   }
 
-  function removeConfirmed(itemId){
-    remotePlaylist.removeConfirmed(itemId);
+  function removeVideo(itemId){
+    remotePlaylist.removeVideo(itemId);
   }
 
-  function moveConfirmed(itemId, newPosition){
-    remotePlaylist.moveConfirmed(itemId, newPosition);
+  function moveVideo(itemId, newPosition){
+    remotePlaylist.moveVideo(itemId, newPosition);
   }
 
-  function setCurrent(itemId){
-    remotePlaylist.setCurrent(itemId);
+  function newPlaylist(order, mapArray){
+    let map = new Map();
+    for (let i = 0; i<order.length; i++){
+      map.set(order[i], mapArray[i]);
+    }
+    remotePlaylist.newPlaylist(order, map);
   }
 
 
   return {
     init:init,
-    play:play,
-    pause:pause,
-    forward:forward,
-    backward:backward,
-    seekTo:seekTo,
-    playVideo:playVideo,
-    addToPlaylist:addToPlaylist,
-    removeFromPlaylist:removeFromPlaylist,
-    moveInPlaylist:moveInPlaylist
+    play,
+    pause,
+    seekTo,
+    forwardClicked,
+    backwardClicked,
+    cueVideoRequest,
+    cueAfterCurrentRequest,
+    cueEndRequest,
+    playVideoClicked,
+    removeVideoClicked,
+    moveVideoPerformed,
+    getPlayer,
+    getPlaylist
   };
 
 }();

@@ -6,6 +6,7 @@ const PlayerController = function() {
     let player = null;
     let playlist = null;
 
+    const TIMEBARMAX = 1000;
 
     window.addEventListener("load", function () {
             $("play_button").onclick = playButtonClicked;
@@ -97,15 +98,15 @@ const PlayerController = function() {
     }
 
     function cueAt(data, position){
-        playlist.cueAt(data, position);
+        playlist.cueAtRequest(data, position);
     }
 
     function cueAfterCurrent(data){
-        playlist.cueAfterCurrent(data);
+        playlist.cueAfterCurrentRequest(data);
     }
 
     function cueEnd(data){
-        playlist.cueEnd(data);
+        playlist.cueEndRequest(data);
     }
 
     function playVideoClicked(itemId){

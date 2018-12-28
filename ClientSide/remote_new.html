@@ -30,17 +30,17 @@
 
     <script src="scripts/PlayerController.js"></script>
     
-    <script src="scripts/master/MasterPlayer.js"></script>
-    <script src="scripts/master/MasterPlaylist.js"></script>
+    <script src="scripts/remote/RemotePlayer.js"></script>
+    <script src="scripts/remote/RemotePlaylist.js"></script>
 
-    <script src="scripts/master/socket.io/MainControllerSocketIO.js"></script>
+    <script src="scripts/remote/socket.io/RemoteControllerSocketIO.js"></script>
     
     <script>
       (function(){
 
         window.addEventListener("load", function () {
-          PlayerController.setBackEnd(MasterPlayer, MasterPlaylist);
-          MainControllerSocketIO.init(MasterPlayer, MasterPlaylist);
+          PlayerController.setBackEnd(RemotePlayer, RemotePlaylist);
+          RemoteControllerSocketIO.init(RemotePlayer, RemotePlaylist);
         }
     );
 

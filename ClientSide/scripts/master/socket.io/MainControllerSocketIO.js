@@ -29,6 +29,9 @@ let MainControllerSocketIO = function() {
   }
 
   function initSockets(){
+    mainPlayer.setRemote(MainControllerSocketIO);
+    mainPlaylist.setRemote(MainControllerSocketIO);
+
     masterSocket = io(HOST + "/masters");
 
     masterSocket.on("play", function(msg){
@@ -37,32 +40,47 @@ let MainControllerSocketIO = function() {
     masterSocket.on("pause", function(msg){
       pause();
     });
-    masterSocket.on("forward", function(msg){
-      forward();
-    });
-    masterSocket.on("backward", function(msg){
-      backward();
-    });
     masterSocket.on("seekTo", function(msg){
       seekTo(msg);
     });
-    masterSocket.on("playVideo", function(msg){
-      playVideo(msg);
+
+    masterSocket.on("forwardClicked", function(msg){
+      forwardClicked();
+    });
+    masterSocket.on("backwardClicked", function(msg){
+      backwardClicked();
+    });
+    masterSocket.on("cueVideoRequest", function(data, position){
+      cueVideoRequest(data, position);
     });
 
+    masterSocket.on("cueAfterCurrentRequest", function(data){
+      cueAfterCurrentRequest(data);
+    });
 
-    masterSocket.on("addToPlaylist", function(data, position){
-      addRequest(data, position);
+    masterSocket.on("cueEndRequest", function(data){
+      cueEndRequest(data);
+    });
+
+    masterSocket.on("playVideoClicked", function(itemId){
+      playVideoClicked(itemId);
     });
     
-    masterSocket.on("removeFromPlaylist", function(itemId){
-      removeRequest(itemId);
+    masterSocket.on("removeVideoClicked", function(itemId){
+      removeVideoClicked(itemId);
     });
 
-    masterSocket.on("moveInPlaylist", function(itemId, newPosition){
-      moveRequest(itemId, newPosition);
+    masterSocket.on("moveVideoPerformed", function(itemId, overItemId){
+      moveVideoPerformed(itemId, overItemId);
     });
 
+    masterSocket.on("getPlayer", function(itemId, overItemId){
+      getPlayer(itemId, overItemId);
+    });
+
+    masterSocket.on("getPlaylist", function(itemId, overItemId){
+      getPlaylist(itemId, overItemId);
+    });
   }
 
   /**
@@ -79,44 +97,53 @@ let MainControllerSocketIO = function() {
     mainPlayer.pause();
   }
 
-  /**
-   * Loads next video in the Playlist
-   */
-  function forward(){
-    mainPlayer.forward();
-  }
-
-  /**
-   * Load previous video from the Playlist
-   */
-  function backward(){
-    mainPlayer.backward();
-  }
-
   function seekTo(time){
     mainPlayer.seekTo(time);
   }
 
-  
-  function playVideo(itemId){
-    mainPlaylist.playVideo(itemId);
+  function forwardClicked(){
+    mainPlaylist.forwardClicked();
   }
 
-  function addRequest(data, position){
-    mainPlaylist.addRequest(data, position);
+  function backwardClicked(){
+    mainPlaylist.backwardClicked();
   }
 
-  function moveRequest(itemId, newPosition){
-    mainPlaylist.moveRequest(itemId, newPosition);
+  function cueVideoRequest(data, position){
+    mainPlaylist.cueVideoRequest(data, position);
   }
 
-  function removeRequest(itemId){
-    mainPlaylist.removeRequest(itemId);
+  function cueAfterCurrentRequest(data, position){
+    mainPlaylist.cueAfterCurrentRequest(data, position);
+  }
+
+  function cueEndRequest(data, position){
+    mainPlaylist.cueEndRequest(data, position);
+  }
+
+  function playVideoClicked(itemId){
+    mainPlaylist.playVideoClicked(itemId);
+  }
+
+  function moveVideoPerformed(itemId, overItemId){
+    mainPlaylist.moveVideoPerformed(itemId, overItemId);
+  }
+
+  function removeVideoClicked(itemId){
+    mainPlaylist.removeVideoClicked(itemId);
+  }
+
+  function getPlayer(){
+    mainPlayer.getPlayer();
+  }
+
+  function getPlaylist(){
+    mainPlaylist.getPlaylist();
   }
 
 
-  function dataChange(data){
-    masterSocket.emit("dataChange", data);
+  function videoChange(data){
+    masterSocket.emit("videoChange", data);
   }
 
   function stateChange(state){
@@ -130,32 +157,36 @@ let MainControllerSocketIO = function() {
 
 
 
-  function addToPlaylist(data, itemId, position){
-    masterSocket.emit("addToPlaylist", data, itemId, position);
+  function cueVideo(itemId, data, position){
+    masterSocket.emit("cueVideo", itemId, data, position);
   }
 
-  function removeFromPlaylist(itemId){
-    masterSocket.emit("removeFromPlaylist", itemId);
+  function removeVideo(itemId){
+    masterSocket.emit("removeVideo", itemId);
   }
 
-  function moveInPlaylist(itemId, newPosition){
-    masterSocket.emit("moveInPlaylist", itemId, newPosition);
+  function moveVideo(itemId, newPosition){
+    masterSocket.emit("moveVideo", itemId, newPosition);
   }
 
-  function setCurrent(position){
-    masterSocket.emit("setCurrent", position);
+  function newPlaylist(order, map){
+    let mapArray = new Array();
+    for (let i = 0; i<order.length; i++){
+      mapArray.push(map.get(order[i]));
+    }
+    masterSocket.emit("newPlaylist", order, mapArray);
   }
 
 
   return {
     init:init,
-    dataChange:dataChange,
-    stateChange:stateChange,
-    timeChange:timeChange,
-    addToPlaylist:addToPlaylist,
-    removeFromPlaylist:removeFromPlaylist,
-    moveInPlaylist:moveInPlaylist,
-    setCurrent:setCurrent
+    videoChange,
+    stateChange,
+    timeChange,
+    cueVideo,
+    removeVideo,
+    moveVideo,
+    newPlaylist
   };
 
 }();

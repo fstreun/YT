@@ -6,139 +6,83 @@ Date: 08/09/2018
 
 "use strict"
 
-let RemotePlayer = function() {
+const RemotePlayer = function () {
 
-    let remoteController = null;
+  let remote = null;
 
-    const TIMEBARMAX = 1000;
-
-    let state = 0;
-  
-    let videoData = null;
-    let duration = null;
-  
-    let timeInterval = null;
-
-
-  /**
-   */
-  function init(newRemoteController){
-    remoteController = newRemoteController;
-
-    $("play_button").onclick = playButtonClicked;
-    $("play_button_bwd").onclick = backward;
-    $("play_button_fwd").onclick = forward;
-
-    let playerTimeBar = $("player_timebar");
-    $("player_timebar").onchange = timebarChanged;
-
-    $("player_timebar").value = 0;
+  function setRemote(newRemote) {
+    remote = newRemote;
+    remote.getPlayer();
   }
 
-  function setRemoteController(newRemoteController){
-    remoteController = newRemoteController;
-  }
-
-
-  /**
-   * Plays current loaded video
-   */
-  function play(){
-    remoteController.play()
-  }
-
-  /**
-   * Pauses current loaded video
-   */
-  function pause(){
-    remoteController.pause();
-  }
-
-  /**
-   * Loads next video in the Playlist
-   */
-  function forward(){
-    remoteController.forward();
-  }
-
-  /**
-   * Load previous video from the Playlist
-   */
-  function backward(){
-    remoteController.backward();
-  }
-
-  function seekTo(time){
-    remoteController.seekTo(time);
-  }
-
-  function dataChange(data){
-    videoData = data;
-    updateText();
-  }
-
-  function stateChange(newState){
-    state = newState;
-    updatePlayButton();
-  }
-
-  function timeChange(time, duration){
-    updateTimebar(time, duration);
-  }
-
-  function playButtonClicked(){
-    if (state == 0){
-      // not playing
-      play();
-    }else if (state == 1){
-      // playing
-      pause();
+  function play() {
+    if (remote) {
+      remote.play()
     }
   }
 
-
-  function timebarChanged(element){
-    let newTime = duration * (element.target.value / TIMEBARMAX);
-    
-    seekTo(newTime);
-  }
-
-  function updateText(){
-    let title = videoData.snippet.title;
-    document.title = title;
-    qs("#player_info .title").innerText = title;
-  }
-
-  function updatePlayButton(){
-    let btn = qs("#play_button")
-    if (state == 0){
-      // not playing
-      btn.classList.remove("fa-pause");
-      btn.classList.add("fa-play");
-
-    }else if (state == 1){
-      // playing
-      btn.classList.remove("fa-play");
-      btn.classList.add("fa-pause");
-
+  function pause() {
+    if (remote) {
+      remote.pause();
     }
   }
 
-  function updateTimebar(currentTime, d){
-    duration = d;
-    $("player_timebar").value = ((currentTime/duration)*TIMEBARMAX);
+  function seekTo(newTime) {
+    if (remote) {
+      remote.seekTo(newTime);
+    }
+  }
+
+  function loadVideo(data, itemId) {
+    if (remote) {
+      remote.videoChange(data, itemId);
+    }
   }
 
   return {
-    init:init,
-    play:play,
-    pause:pause,
-    forward:forward,
-    backward:backward,
-    dataChange:dataChange,
-    stateChange:stateChange,
-    timeChange:timeChange,
-    setRemoteController:setRemoteController
+    setRemote,
+    play,
+    pause,
+    seekTo,
+    loadVideo,
+
+    stateChange,
+    timeChange,
+    videoChange
   };
+
+  function stateChange(playerStatus) {
+    let state = 0;
+    if (playerStatus == -1) {
+      // unstarted
+      state = 0;
+    } else if (playerStatus == 0) {
+      // ended
+      state = 0;
+    } else if (playerStatus == 1) {
+      // playing
+      state = 1;
+    } else if (playerStatus == 2) {
+      // paused
+      state = 0;
+    } else if (playerStatus == 3) {
+      // buffering
+      return;
+    } else if (playerStatus == 5) {
+      // video cued
+      return;
+    }
+
+    PlayerController.stateChange(state);
+  }
+
+  function timeChange(newTime, duration) {
+
+    PlayerController.timeChange(newTime, duration);
+  }
+
+  function videoChange(data, itemId) {
+    PlayerController.videoChange(data, itemId);
+  }
 
 }();

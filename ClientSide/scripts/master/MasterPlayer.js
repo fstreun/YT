@@ -4,6 +4,11 @@ const MasterPlayer = function () {
     let remote = null;
     let YTPlayer = null;
 
+    let currentState = 0;
+    let currentData = null;
+    let currentItemId = null;
+    let currentTime = 0;
+
     function setYTPlayer(ytplayer) {
         YTPlayer = ytplayer;
         console.log("YouTube player binded to MasterPlayer")
@@ -30,10 +35,7 @@ const MasterPlayer = function () {
 
         // because not listening for response
         // must call response itself
-        PlayerController.videoChange(data, itemId);
-        if (remote) {
-            remote.videoChange(data, itemId);
-        }
+        videoChange(data, itemId);
     }
 
     return {
@@ -45,7 +47,9 @@ const MasterPlayer = function () {
         loadVideo,
 
         stateChange,
-        timeChange
+        timeChange,
+        videoChange,
+        getPlayer
     };
 
     // YTPlayer calls this!
@@ -72,6 +76,8 @@ const MasterPlayer = function () {
             return;
         }
 
+        currentState = state;
+
         PlayerController.stateChange(state);
         if (remote) {
             remote.stateChange(state);
@@ -79,10 +85,28 @@ const MasterPlayer = function () {
     }
 
     function timeChange(newTime, duration) {
-
+        currentTime = newTime;
         PlayerController.timeChange(newTime, duration);
         if (remote) {
             remote.timeChange(newTime, duration);
+        }
+    }
+
+    function videoChange(data, itemId){
+        currentData = data;
+        currentItemId = itemId;
+
+        PlayerController.videoChange(data, itemId);
+        if (remote) {
+            remote.videoChange(data, itemId);
+        }
+    }
+
+    function getPlayer(){
+        if(remote){
+            remote.stateChange(currentState);
+            remote.timeChange(currentTime);
+            remote.videoChange(currentData, currentItemId);
         }
     }
 }();
