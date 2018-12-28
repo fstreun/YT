@@ -17,6 +17,10 @@ let MainControllerSocketIO = function() {
   let mainPlaylist = null;
 
   function init(newMainPlayer, newMainPlaylist, newMasterId){
+    if (masterSocket){
+      masterSocket.close();
+      masterSocket = null;
+    }
     mainPlayer = newMainPlayer;
     mainPlaylist = newMainPlaylist;
     masterId = newMasterId;
