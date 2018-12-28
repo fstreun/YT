@@ -42,10 +42,10 @@ const RemoteControllerSocketIO = function() {
 
   function initSockets(){
 
-    remoteSocket = io(HOST + "/remotes");
+    remoteSocket = io(HOST + "/remotes",{query: {masterId: masterId}});
 
     remoteSocket.on('connect', function(msg){
-      remoteSocket.emit('joinMaster', masterId);
+      
     });
 
     remoteSocket.on("videoChange", function(msg){

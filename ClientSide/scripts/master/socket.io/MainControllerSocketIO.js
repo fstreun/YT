@@ -38,10 +38,10 @@ let MainControllerSocketIO = function() {
     mainPlayer.setRemote(MainControllerSocketIO);
     mainPlaylist.setRemote(MainControllerSocketIO);
 
-    masterSocket = io(HOST + "/masters");
+    masterSocket = io(HOST + "/masters", {query: {masterId: masterId}});
 
     masterSocket.on("connect", function(msg){
-      masterSocket.emit("masterId", masterId);
+      
     });
 
     masterSocket.on("play", function(msg){
