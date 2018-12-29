@@ -9,7 +9,7 @@ const PlayerController = function () {
 
     const domMap = new Map();   // maps itemId to dom element
     let currentId = null;
-    
+
     const TIMEBARMAX = 1000;
     let currentDuration = TIMEBARMAX;
 
@@ -20,7 +20,7 @@ const PlayerController = function () {
         $("play_button_fwd").onclick = forwardClicked;
 
         let playerTimeBar = $("player_timebar");
-        $("player_timebar").onchange = timebarChanged;
+        $("player_timebar").oninput = timebarChanged;
 
         $("player_timebar").value = 0;
     });
