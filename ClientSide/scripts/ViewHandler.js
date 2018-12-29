@@ -10,10 +10,11 @@ let PlayerViewHandler = function(){
   window.addEventListener("load", onLoad);
 
   function onLoad(event){
-    $("player_expand").onclick = expandClicked;
+    $("player_expand").onclick = expandPlayerClicked;
+    $("share_bar_btn").onclick = expandShareClicked;
   }
 
-  function expandClicked(){
+  function expandPlayerClicked(){
     qs("main").classList.toggle("player_expanded");
   }
 
@@ -24,6 +25,11 @@ let PlayerViewHandler = function(){
   function contractPlayer(){
     qs("main").classList.remove("player_expanded");
   }
+
+  function expandShareClicked(){
+    $("share_bar").classList.toggle("expanded");
+  }
+
 
   return {
     expandPlayer:expandPlayer,
