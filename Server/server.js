@@ -1,9 +1,17 @@
-let app = require('express')();
+let express = require('express');
+let app = express();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 
+app.use(express.static(__dirname + "/../ClientSide"));
+
 app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile('index.html', {root: __dirname+'/../ClientSide'});
+});
+
+app.get('/:masterId', function(req, res){
+  const masterId = req.params.masterId;
+  res.sendFile('remote.html', {root: __dirname+'/../ClientSide'});
 });
 
 let remotes = io.of("/remotes");
@@ -122,6 +130,7 @@ masters.on('connection', function (socket) {
 http.listen(3000, function () {
   console.log('listening on *:3000');
 });
+
 
 function getRemoteRoomId(masterId) {
   return "RemoteRoomOf: " + masterId;

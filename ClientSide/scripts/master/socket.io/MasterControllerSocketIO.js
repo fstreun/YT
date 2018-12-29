@@ -6,9 +6,7 @@ Date: 08/09/2018
 
 "use strict"
 
-let MainControllerSocketIO = function() {
-
-  const HOST = "http://localhost:3000";
+let MasterControllerSocketIO = function() {
 
   let masterSocket = null;
   let masterId = null;
@@ -27,7 +25,7 @@ let MainControllerSocketIO = function() {
 
     // 2. This code loads code
     let tag = document.createElement('script');
-    tag.src = "http://localhost:3000/socket.io/socket.io.js";
+    tag.src = "/socket.io/socket.io.js";
     tag.onload = initSockets;
 
     let firstScriptTag = document.getElementsByTagName('script')[0];
@@ -35,10 +33,10 @@ let MainControllerSocketIO = function() {
   }
 
   function initSockets(){
-    mainPlayer.setRemote(MainControllerSocketIO);
-    mainPlaylist.setRemote(MainControllerSocketIO);
+    mainPlayer.setRemote(MasterControllerSocketIO);
+    mainPlaylist.setRemote(MasterControllerSocketIO);
 
-    masterSocket = io(HOST + "/masters", {query: {masterId: masterId}});
+    masterSocket = io("/masters", {query: {masterId: masterId}});
 
     masterSocket.on("connect", function(msg){
       

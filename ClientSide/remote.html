@@ -21,17 +21,31 @@
     <title></title>
     <meta content="">
 
-    <script src="https://apis.google.com/js/api.js"></script>
-
-    <script src="scripts/remote/Global.js"></script>
+    <script src="scripts/Global.js"></script>
     <script src="scripts/playerExpand.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="scripts/YTDataAPI.js"></script>
 
     <script src="scripts/YTBrowser.js"></script>
 
-    <script src="scripts/YTDataAPI.js"></script>
+    <script src="scripts/PlayerController.js"></script>
+    
     <script src="scripts/remote/RemotePlayer.js"></script>
     <script src="scripts/remote/RemotePlaylist.js"></script>
-    <script src="scripts/TestSearch.js"></script>
+
+    <script src="scripts/remote/socket.io/RemoteControllerSocketIO.js"></script>
+    
+    <script>
+      (function(){
+
+        window.addEventListener("load", function () {
+          PlayerController.setBackEnd(RemotePlayer, RemotePlaylist);
+          RemoteControllerSocketIO.init(RemotePlayer, RemotePlaylist, location.pathname.replace(/^\/+/g, ''));
+        }
+    );
+
+      })();
+    </script>
     
   </head>
   <body>

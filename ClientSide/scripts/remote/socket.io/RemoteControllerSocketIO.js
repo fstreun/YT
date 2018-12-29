@@ -8,8 +8,6 @@ Date: 08/09/2018
 
 const RemoteControllerSocketIO = function() {
 
-  const HOST = "http://localhost:3000";
-
   let remoteSocket = null;
   let masterId = null;
 
@@ -28,7 +26,7 @@ const RemoteControllerSocketIO = function() {
 
     // 2. This code loads code
     let tag = document.createElement('script');
-    tag.src = "http://localhost:3000/socket.io/socket.io.js";
+    tag.src = "/socket.io/socket.io.js";
     tag.onload = initSockets;
 
     let firstScriptTag = document.getElementsByTagName('script')[0];
@@ -42,7 +40,7 @@ const RemoteControllerSocketIO = function() {
 
   function initSockets(){
 
-    remoteSocket = io(HOST + "/remotes",{query: {masterId: masterId}});
+    remoteSocket = io("/remotes",{query: {masterId: masterId}});
 
     remoteSocket.on('connect', function(msg){
       
