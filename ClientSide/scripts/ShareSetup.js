@@ -16,6 +16,7 @@ const ShareSetup = function() {
         }
         remoteURL += "/" + id;
         $("remote_link").innerText = remoteURL;
+        $("remote_link").href = "/" + id;
     }
 
 }();

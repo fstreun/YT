@@ -46,6 +46,10 @@ main {
   margin: 15px;
 }
 
+#share_bar a{
+  color: white;
+}
+
 #share_bar.expanded{
 
   right: 0;
