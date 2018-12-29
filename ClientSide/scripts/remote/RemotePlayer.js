@@ -83,6 +83,18 @@ const RemotePlayer = function () {
 
   function videoChange(data, itemId) {
     PlayerController.videoChange(data, itemId);
+    setThumbnail(data);
+  }
+
+  function setThumbnail(data){
+    let thumbnail = document.createElement("img");
+    thumbnail.src = data.snippet.thumbnails.high.url;
+    thumbnail.style.maxHeight = "100%";
+    thumbnail.style.maxWidth = "100%";
+
+    let pv = $("player_video_e");
+    pv.innerText = "";
+    pv.appendChild(thumbnail);
   }
 
 }();
