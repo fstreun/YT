@@ -1,0 +1,12 @@
+{
+    "name": "ytplaylist",
+    "version": "0.0.1",
+    "author": {
+        "name": "Fabio Streun"
+    },
+    "description": "YouTube Player which supports remote controllers connected over the internet.",
+    "dependencies": {
+        "express": "^4.16.4",
+        "socket.io": "^2.2.0"
+    }
+}

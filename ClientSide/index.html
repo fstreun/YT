@@ -21,18 +21,30 @@
     <title></title>
     <meta content="">
 
-    <script src="https://apis.google.com/js/api.js"></script>
-
     <script src="scripts/Global.js"></script>
-    <script src="scripts/playerExpand.js"></script>
+    <script src="scripts/ViewHandler.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="scripts/YTDataAPI.js"></script>
 
     <script src="scripts/YTBrowser.js"></script>
 
-    <script src="scripts/YTDataAPI.js"></script>
-    <script src="scripts/MainPlayer.js"></script>
-    <script src="scripts/MainPlaylist.js"></script>
-    <script src="scripts/YTPlayer.js"></script>
-    <script src="scripts/TestSearch.js"></script>
+    <script src="scripts/PlayerController.js"></script>
+    
+    <script src="scripts/master/MasterPlayer.js"></script>
+    <script src="scripts/master/MasterPlaylist.js"></script>
+
+    <script src="scripts/master/socket.io/MasterControllerSocketIO.js"></script>
+    <script src="scripts/ShareSetup.js"></script>
+    <script>
+      (function(){
+
+        window.addEventListener("load", function () {
+          PlayerController.setBackEnd(MasterPlayer, MasterPlaylist);
+        }
+    );
+
+      })();
+    </script>
     
   </head>
   <body>
@@ -48,12 +60,20 @@
           <input type="text" placeholder="Search" id="search_input">
           <button id="search_btn"><i class="fa fa-search"></i></button>
         </div>
-        <div class="empty"> </div>
+        <div id="share_bar_btn" class="icon">
+          <span class="fas fa-share-alt"></span>
+        </div>
     </header>
-
 
     <main>
 
+      <div id="share_bar">
+        <p>Share your Player:</p>
+        <input type="text" placeholder="Player ID" id="playerID_input">
+        <button id="share_btn">OK</button>
+        <p>Remote Player Access:</p>
+        <p id="remote_link">Not Online Yet!</p>
+      </div>
 
       <!--
         BROWSER
@@ -75,7 +95,9 @@
           <!--
             VIDEO
           -->
-          <div id="player_video"></div>
+          <div id="player_video">
+            <div id="player_video_e"></div>
+          </div>
 
           <input type="range" id="player_timebar" min="0" max="1000" value="0">
 

@@ -7,35 +7,20 @@ Date: 17/08/2018
 
 
 "use strict";
-let YTBrowser = function() {
+let YTBrowser = function () {
 
-  let player = null;
-  let playlist = null;
-
-  /**
-   * Initialze the listeners for the search field.
-   * Should be called after the window is loaded (window.onload).
-   */
-  function init(){
+  window.addEventListener("load", function () {
     clear();
     $("search_btn").onclick = searchClicked;
-    $("search_input").addEventListener("keyup", function(event){
+    $("search_input").addEventListener("keyup", function (event) {
       event.preventDefault();
-      if(event.keyCode === 13){
+      if (event.keyCode === 13) {
         $("search_btn").click();
       }
     });
-  }
+  });
 
-  function setPlaylist(newPlaylist){
-    playlist = newPlaylist;
-  }
-
-  function setPlayer(newPlayer){
-    player = newPlayer;
-  }
-
-  function searchClicked(){
+  function searchClicked() {
     let q = $("search_input").value;
     YTDataAPI.getSearch(q, appendSearchResult);
 
@@ -46,7 +31,7 @@ let YTBrowser = function() {
     PlayerViewHandler.contractPlayer();
   }
 
-  function playlistClicked(playlist){
+  function playlistClicked(playlist) {
     let playlistId = playlist.id.playlistId;
     YTDataAPI.getPlaylistItems(playlistId, appendPlaylistItems);
 
@@ -59,17 +44,17 @@ let YTBrowser = function() {
     PlayerViewHandler.contractPlayer();
   }
 
-  function appendSearchResult(json){
+  function appendSearchResult(json) {
     let fragment = document.createDocumentFragment();
     for (const index in json) {
       if (json.hasOwnProperty(index)) {
         const data = json[index];
 
-        if (data.id.kind == "youtube#video"){
+        if (data.id.kind == "youtube#video") {
           fragment.appendChild(getVideoDOM(data));
-        } else if (data.id.kind == "youtube#playlist"){
+        } else if (data.id.kind == "youtube#playlist") {
           fragment.appendChild(getPlaylistDOM(data));
-        } else if (data.id.kind == "youtube#channel"){
+        } else if (data.id.kind == "youtube#channel") {
           fragment.appendChild(getChannelDOM(data));
         } else {
           console.error("YTBrowser: Unknown search result type: " + data.id.kind);
@@ -79,13 +64,13 @@ let YTBrowser = function() {
     qs("#browser .search-result").appendChild(fragment);
   }
 
-  function appendPlaylistItems(json){
+  function appendPlaylistItems(json) {
     let fragment = document.createDocumentFragment();
     for (const index in json) {
       if (json.hasOwnProperty(index)) {
         const data = json[index];
 
-        if (data.id.kind == "youtube#video"){
+        if (data.id.kind == "youtube#video") {
           fragment.appendChild(getVideoDOM(data));
         } else {
           console.error("YTBrowser: Unknown search result type: " + data.id.kind);
@@ -95,7 +80,7 @@ let YTBrowser = function() {
     qs("#browser .playlist-result").appendChild(fragment);
   }
 
-  function getVideoDOM(data){
+  function getVideoDOM(data) {
     let item = document.createElement("div");
     item.classList.add("list_item", "video", "mouse-pointer");
 
@@ -106,7 +91,7 @@ let YTBrowser = function() {
 
     let info = document.createElement("div");
     info.classList.add("info");
-    
+
     let title = document.createElement("div");
     title.classList.add(["title"]);
     title.innerText = data.snippet.title;
@@ -120,7 +105,7 @@ let YTBrowser = function() {
     info.appendChild(time);
 
     item.appendChild(info);
-    
+
 
     let right = document.createElement("div");
     right.classList.add("right", "item-hover");
@@ -128,33 +113,33 @@ let YTBrowser = function() {
     // add front
     let addFront = document.createElement("span");
     addFront.classList.add("option", "fas", "fa-plus-circle");
-    addFront.addEventListener("click", function(event){
+    addFront.addEventListener("click", function (event) {
       event.stopPropagation();
-      playlist.cueAfterCurrent(data);
+      PlayerController.cueAfterCurrent(data);
     });
     right.appendChild(addFront);
 
     // add back
     let addBack = document.createElement("span");
     addBack.classList.add("option", "fas", "fa-level-down-alt");
-    addBack.addEventListener("click", function(event){
+    addBack.addEventListener("click", function (event) {
       event.stopPropagation();
-      playlist.cueEnd(data);
+      PlayerController.cueEnd(data);
     });
     right.appendChild(addBack);
 
     item.appendChild(right);
 
-    item.addEventListener("click", function(event){
+    item.addEventListener("click", function (event) {
       event.stopPropagation();
-      playlist.cueAfterCurrent(data);
-      player.forward();
+      PlayerController.cueAfterCurrent(data);
+      PlayerController.forwardClicked();
     });
 
     return item;
   }
 
-  function getChannelDOM(data){
+  function getChannelDOM(data) {
     let item = document.createElement("div");
     item.classList.add("list_item", "channel", "mouse-pointer");
 
@@ -165,7 +150,7 @@ let YTBrowser = function() {
 
     let info = document.createElement("div");
     info.classList.add("info");
-    
+
     let title = document.createElement("div");
     title.classList.add(["title"]);
     title.innerText = data.snippet.title;
@@ -173,14 +158,14 @@ let YTBrowser = function() {
 
     item.appendChild(info);
 
-    item.addEventListener("click", function(event){
+    item.addEventListener("click", function (event) {
       event.stopPropagation();
     });
 
     return item;
   }
 
-  function getPlaylistDOM(data){
+  function getPlaylistDOM(data) {
     let item = document.createElement("div");
     item.classList.add("list_item", "playlist", "mouse-pointer");
 
@@ -191,7 +176,7 @@ let YTBrowser = function() {
 
     let info = document.createElement("div");
     info.classList.add("info");
-    
+
     let title = document.createElement("div");
     title.classList.add(["title"]);
     title.innerText = data.snippet.title;
@@ -199,7 +184,7 @@ let YTBrowser = function() {
 
     item.appendChild(info);
 
-    item.addEventListener("click", function(event){
+    item.addEventListener("click", function (event) {
       event.stopPropagation();
       playlistClicked(data);
     });
@@ -207,15 +192,9 @@ let YTBrowser = function() {
     return item;
   }
 
-  function clear(){
+  function clear() {
     let browser = $("browser");
     browser.innerHTML = "";
   }
 
-
-  return {
-    init:init,
-    setPlayer:setPlayer,
-    setPlaylist:setPlaylist
-  }
 }();

@@ -32,11 +32,11 @@ function onYouTubeIframeAPIReady() {
     events: {
       'onReady': onPlayerReady,
       'onStateChange': function(event){
-        MainPlayer.stateChanged(event.data);
+        MasterPlayer.stateChanged(event.data);
       }
     }
   });
-  MainPlayer.init(player);
+  MasterPlayer.setYTPlayer(player);
 }
 
 // 4. The API will call this function when the video player is ready.

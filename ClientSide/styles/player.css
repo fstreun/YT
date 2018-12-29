@@ -83,6 +83,11 @@ main.player_expanded #player_playlist {
   align-self: center;
 }
 
+#player_video_e {
+  width: 100%;
+  height: 100%;
+}
+
 #player_info {
   flex-basis: 0;
   flex-grow: 1;

@@ -1,100 +1,137 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+let express = require('express');
+let app = express();
+let http = require('http').Server(app);
+let io = require('socket.io')(http);
 
-app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
+app.use(express.static(__dirname + "/../ClientSide"));
+
+app.get('/', function (req, res) {
+  res.sendFile('index.html', {root: __dirname+'/../ClientSide'});
+});
+
+app.get('/:masterId', function(req, res){
+  const masterId = req.params.masterId;
+  res.sendFile('remote.html', {root: __dirname+'/../ClientSide'});
 });
 
 let remotes = io.of("/remotes");
 let masters = io.of("/masters");
 
-remotes.on('connection', function(socket){
+remotes.on('connection', function (socket) {
   console.log('remote socket connected');
+  const masterId = socket.handshake.query.masterId;
+  const remoteRoomId = getRemoteRoomId(masterId);
 
-  socket.on('disconnect', function(){
+  socket.join(remoteRoomId);
+  console.log('joined master: ' + masterId);
+
+  socket.on('play', function (msg) {
+    masters.to(masterId).emit('play', '');
+  });
+
+  socket.on('pause', function (msg) {
+    masters.to(masterId).emit('pause', '');
+  });
+
+  socket.on('seekTo', function (msg) {
+    masters.to(masterId).emit('seekTo', msg);
+  });
+
+
+  socket.on('forwardClicked', function (msg) {
+    masters.to(masterId).emit('forwardClicked', '');
+  });
+
+  socket.on('backwardClicked', function (msg) {
+    masters.to(masterId).emit('backwardClicked', '');
+  });
+
+  socket.on("cueVideoRequest", function (data, position) {
+    masters.to(masterId).emit("cueVideoRequest", data, position);
+  });
+
+  socket.on("cueAfterCurrentRequest", function (data) {
+    masters.to(masterId).emit("cueAfterCurrentRequest", data);
+  });
+
+  socket.on("cueEndRequest", function (data) {
+    masters.to(masterId).emit("cueEndRequest", data);
+  });
+
+  socket.on("playVideoClicked", function (itemId) {
+    masters.to(masterId).emit("playVideoClicked", itemId);
+  });
+
+  socket.on("removeVideoClicked", function (itemId) {
+    masters.to(masterId).emit("removeVideoClicked", itemId);
+  });
+
+  socket.on("moveVideoPerformed", function (itemId, overItemId) {
+    masters.to(masterId).emit("moveVideoPerformed", itemId, overItemId);
+  });
+
+  socket.on("getPlayer", function (msg) {
+    masters.to(masterId).emit("getPlayer");
+  });
+
+  socket.on("getPlaylist", function (msg) {
+    masters.to(masterId).emit("getPlaylist");
+  });
+
+  socket.on('disconnect', function () {
     console.log('remote socket disconnected');
   });
 
-  socket.on('play', function(msg){
-    masters.emit('play', '');
-  });
-
-  socket.on('pause', function(msg){
-    masters.emit('pause', '');
-  });
-
-  socket.on('forward', function(msg){
-    masters.emit('forward', '');
-  });
-
-  socket.on('backward', function(msg){
-    masters.emit('backward', '');
-  });
-
-  socket.on('seekTo', function(msg){
-    masters.emit('seekTo', msg);
-  });
-
-  socket.on('playVideo', function(msg){
-    masters.emit('playVideo', msg);
-  });
-
-
-  socket.on("addToPlaylist", function(data, position){
-    masters.emit("addToPlaylist", data, position);
-  });
-
-  socket.on("removeFromPlaylist", function(itemId){
-    masters.emit("removeFromPlaylist", itemId);
-  });
-
-  socket.on("moveInPlaylist", function(itemId, newPosition){
-    masters.emit("moveInPlaylist", itemId, newPosition);
-  });
-
 });
 
 
-masters.on('connection', function(socket){
+masters.on('connection', function (socket) {
   console.log('master socket connected');
+  const masterId = socket.handshake.query.masterId;
+  const remoteRoomId = getRemoteRoomId(masterId);
 
-  socket.on('disconnect', function(){
+  socket.join(masterId);
+  console.log('master joined room: ' + masterId);
+
+  socket.on('videoChange', function (data, itemId) {
+    remotes.to(remoteRoomId).emit('videoChange', data, itemId);
+  });
+  socket.on('stateChange', function (msg) {
+    remotes.to(remoteRoomId).emit('stateChange', msg);
+  });
+  socket.on('timeChange', function (d, t) {
+    remotes.to(remoteRoomId).emit('timeChange', d, t);
+  });
+
+
+
+  socket.on("cueVideo", function (itemId, data, position) {
+    remotes.to(remoteRoomId).emit("cueVideo", itemId, data, position);
+  });
+
+  socket.on("removeVideo", function (itemId) {
+    remotes.to(remoteRoomId).emit("removeVideo", itemId);
+  });
+
+  socket.on("moveVideo", function (itemId, newPosition) {
+    remotes.to(remoteRoomId).emit("moveVideo", itemId, newPosition);
+  });
+
+  socket.on("newPlaylist", function (order, map) {
+    remotes.to(remoteRoomId).emit("newPlaylist", order, map);
+  });
+
+  socket.on('disconnect', function () {
     console.log('master socket disconnected');
   });
-
-
-  socket.on('dataChange', function(msg){
-    remotes.emit('dataChange', msg);
-  });
-  socket.on('stateChange', function(msg){
-    remotes.emit('stateChange', msg);
-  });
-  socket.on('timeChange', function(d, t){
-    remotes.emit('timeChange', d, t);
-  });
-
-
-
-  socket.on("addToPlaylist", function(data, itemId, position){
-    remotes.emit("addToPlaylist", data, itemId, position);
-  });
-
-  socket.on("removeFromPlaylist", function(itemId){
-    remotes.emit("removeFromPlaylist", itemId);
-  });
-
-  socket.on("moveInPlaylist", function(itemId, newPosition){
-    remotes.emit("moveInPlaylist", itemId, newPosition);
-  });
-
-  socket.on("setCurrent", function(position){
-    remotes.emit("setCurrent", position);
-  });
-
 });
 
 
-http.listen(3000, function(){
+http.listen(3000, function () {
   console.log('listening on *:3000');
-}); 
+});
+
+
+function getRemoteRoomId(masterId) {
+  return "RemoteRoomOf: " + masterId;
+}
