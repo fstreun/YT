@@ -30,11 +30,11 @@ main {
 
 #share_bar{
   height: 100%;
-  width: 300px;
+  width: 100%;
 
   position: absolute;
   top: 0;
-  right: -300px;
+  right: -100%;
   background: black;
   z-index: 2;
   transition: 0.5s;
