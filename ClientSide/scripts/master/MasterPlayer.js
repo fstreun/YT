@@ -9,6 +9,9 @@ const MasterPlayer = function () {
     let currentItemId = null;
     let currentTime = 0;
 
+    let timeInterval = null;
+    const TIMEINTERVAL = 1000;
+
     function setYTPlayer(ytplayer) {
         YTPlayer = ytplayer;
         console.log("YouTube player binded to MasterPlayer")
@@ -76,11 +79,18 @@ const MasterPlayer = function () {
             return;
         }
 
-        currentState = state;
+        if(currentState != state){
+            currentState = state;
+            PlayerController.stateChange(state);
+            if (remote) {
+                remote.stateChange(state);
+            }
 
-        PlayerController.stateChange(state);
-        if (remote) {
-            remote.stateChange(state);
+            if(currentState == 0){
+                stopTimeInterval();
+            }else{
+                startTimeInterval();
+            }
         }
     }
 
@@ -107,6 +117,25 @@ const MasterPlayer = function () {
             remote.stateChange(currentState);
             remote.timeChange(currentTime);
             remote.videoChange(currentData, currentItemId);
+        }
+    }
+
+    function startTimeInterval(){
+        if(timeInterval){
+            // already running
+        }else{
+            timeInterval = setInterval(function(){
+                timeChange(YTPlayer.getCurrentTime(), YTPlayer.getDuration());
+            }, TIMEINTERVAL);
+        }
+    }
+
+    function stopTimeInterval(){
+        if(timeInterval){
+            clearInterval(timeInterval);
+            timeInterval = null;
+        }else{
+            // already stopped
         }
     }
 }();

@@ -34,8 +34,10 @@ const RemoteControllerSocketIO = function() {
   }
 
   function initFinished(){
-    remotePlayer.setRemote(RemoteControllerSocketIO);
+    // player can only set current if playlist is already there
+    // (race condition...)
     remotePlaylist.setRemote(RemoteControllerSocketIO);
+    remotePlayer.setRemote(RemoteControllerSocketIO);
   }
 
   function initSockets(){
@@ -46,8 +48,8 @@ const RemoteControllerSocketIO = function() {
       
     });
 
-    remoteSocket.on("videoChange", function(msg){
-      videoChange(msg);
+    remoteSocket.on("videoChange", function(data, itemId){
+      videoChange(data, itemId);
     });
     remoteSocket.on("stateChange", function(msg){
       stateChange(msg);
@@ -134,8 +136,8 @@ const RemoteControllerSocketIO = function() {
     remoteSocket.emit("getPlaylist")
   }
   
-  function videoChange(data){
-    remotePlayer.videoChange(data);
+  function videoChange(data, itemId){
+    remotePlayer.videoChange(data, itemId);
   }
 
   function stateChange(state){

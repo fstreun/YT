@@ -93,8 +93,8 @@ masters.on('connection', function (socket) {
   socket.join(masterId);
   console.log('master joined room: ' + masterId);
 
-  socket.on('videoChange', function (msg) {
-    remotes.to(remoteRoomId).emit('videoChange', msg);
+  socket.on('videoChange', function (data, itemId) {
+    remotes.to(remoteRoomId).emit('videoChange', data, itemId);
   });
   socket.on('stateChange', function (msg) {
     remotes.to(remoteRoomId).emit('stateChange', msg);

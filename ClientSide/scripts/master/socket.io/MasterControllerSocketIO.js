@@ -150,8 +150,8 @@ let MasterControllerSocketIO = function() {
   }
 
 
-  function videoChange(data){
-    masterSocket.emit("videoChange", data);
+  function videoChange(data, itemId){
+    masterSocket.emit("videoChange", data, itemId);
   }
 
   function stateChange(state){

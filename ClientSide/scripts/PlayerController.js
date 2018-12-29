@@ -1,26 +1,32 @@
 
 
 "use strict";
-const PlayerController = function() {
+const PlayerController = function () {
 
     let player = null;
     let playlist = null;
 
+
+    const domMap = new Map();   // maps itemId to dom element
+    let currentId = null;
+    
     const TIMEBARMAX = 1000;
+    let currentDuration = TIMEBARMAX;
+
 
     window.addEventListener("load", function () {
-            $("play_button").onclick = playButtonClicked;
-            $("play_button_bwd").onclick = backwardClicked;
-            $("play_button_fwd").onclick = forwardClicked;
-        
-            let playerTimeBar = $("player_timebar");
-            $("player_timebar").onchange = timebarChanged;
-        
-            $("player_timebar").value = 0;
+        $("play_button").onclick = playButtonClicked;
+        $("play_button_bwd").onclick = backwardClicked;
+        $("play_button_fwd").onclick = forwardClicked;
+
+        let playerTimeBar = $("player_timebar");
+        $("player_timebar").onchange = timebarChanged;
+
+        $("player_timebar").value = 0;
     });
 
 
-    function setBackEnd(newPlayer, newPlaylist){
+    function setBackEnd(newPlayer, newPlaylist) {
         player = newPlayer;
         playlist = newPlaylist;
     }
@@ -28,103 +34,105 @@ const PlayerController = function() {
     //########### player controls
     let state = 0;
 
-    function playButtonClicked(){
-        if (state == 0){
+    function playButtonClicked() {
+        if (state == 0) {
             // not playing
             play();
-        }else if (state == 1){
+        } else if (state == 1) {
             // playing
             pause();
         }
     }
 
-    function timebarChanged(){
-
+    function timebarChanged(element) {
+        let newTime = currentDuration * (element.target.value/TIMEBARMAX);
+        player.seekTo(newTime);
     }
 
-    function play(){
-        if(player){
+    function play() {
+        if (player) {
             player.play();
         }
     }
 
-    function pause(){
-        if(player){
+    function pause() {
+        if (player) {
             player.pause();
         }
     }
 
-    function seekTo(newTime){
-        if(player){
+    function seekTo(newTime) {
+        if (player) {
             player.seekTo(newTime);
         }
     }
 
-    function loadVideo(data, itemId){
-        if(player){
+    function loadVideo(data, itemId) {
+        if (player) {
             player.loadVideo(data, itemId);
         }
+
     }
 
 
     // player should call this if state changed!
-    function stateChange(newState){
+    function stateChange(newState) {
         state = newState;
         updatePlayButton(newState);
     }
 
 
     // player should call this if time changed!
-    function timeChange(newTime, duration){
+    function timeChange(newTime, duration) {
         updateTimebar(newTime, duration);
+        currentDuration = duration;
     }
 
     // player should call this if data changes!
-    function videoChange(data, itemId){
+    function videoChange(data, itemId) {
+        currentId = itemId;
         updateText(data);
         setCurrent(itemId);
     }
 
     //########### PLAYLIST
 
-    const domMap = new Map();   // maps itemId to dom element
-
-    function forwardClicked(){
+    function forwardClicked() {
         playlist.forwardClicked();
     }
 
-    function backwardClicked(){
+    function backwardClicked() {
         playlist.backwardClicked();
     }
 
-    function cueAt(data, position){
+    function cueAt(data, position) {
         playlist.cueAtRequest(data, position);
     }
 
-    function cueAfterCurrent(data){
+    function cueAfterCurrent(data) {
         playlist.cueAfterCurrentRequest(data);
     }
 
-    function cueEnd(data){
+    function cueEnd(data) {
         playlist.cueEndRequest(data);
     }
 
-    function playVideoClicked(itemId){
+    function playVideoClicked(itemId) {
         playlist.playVideoClicked(itemId)
     }
 
-    function removeVideoClicked(itemId){
+    function removeVideoClicked(itemId) {
         playlist.removeVideoClicked(itemId);
     }
 
-    function moveVideoPerformed(itemId, newPosition){
+    function moveVideoPerformed(itemId, newPosition) {
         playlist.moveVideoPerformed(itemId, newPosition);
     }
 
 
     //######## responses
 
-    function addAfter(itemId, data, referenceId){
+    function addAfter(itemId, data, referenceId) {
         const dom = newPlaylistItem(itemId, data);
         domMap.set(itemId, dom);
 
@@ -132,7 +140,7 @@ const PlayerController = function() {
         insertAfter(list, dom, domMap.get(referenceId))
     }
 
-    function addBefore(itemId, data, referenceId){
+    function addBefore(itemId, data, referenceId) {
         const dom = newPlaylistItem(itemId, data);
         domMap.set(itemId, dom);
 
@@ -140,15 +148,15 @@ const PlayerController = function() {
         list.insertBefore(dom, domMap.get(referenceId))
     }
 
-    function removeVideo(itemId){
+    function removeVideo(itemId) {
         const dom = domMap.get(itemId);
         dom.parentNode.removeChild(dom);
 
         domMap.delete(itemId);
     }
 
-    function moveVideoBefore(itemId, toItemId){
-        if(itemId != toItemId){
+    function moveVideoBefore(itemId, toItemId) {
+        if (itemId != toItemId) {
             const dom = domMap.get(itemId);
             const to = domMap.get(toItemId);
 
@@ -157,7 +165,7 @@ const PlayerController = function() {
     }
 
 
-    function newPlaylistItem(itemId, data){
+    function newPlaylistItem(itemId, data) {
         // create list item
         let item = document.createElement("div");
         item.classList.add("list_item", "video", "mouse-pointer");
@@ -192,7 +200,7 @@ const PlayerController = function() {
         // remove
         let remove = document.createElement("span");
         remove.classList.add("option", "fas", "fa-times-circle");
-        remove.addEventListener("click", function(event){
+        remove.addEventListener("click", function (event) {
             event.stopPropagation();
             removeVideoClicked(itemId);
         });
@@ -201,71 +209,71 @@ const PlayerController = function() {
 
         item.appendChild(right);
 
-        item.addEventListener("click", function(event){
+        item.addEventListener("click", function (event) {
             event.stopPropagation();
             playVideoClicked(itemId);
         });
 
-        item.addEventListener("dragstart", function(e){
+        item.addEventListener("dragstart", function (e) {
             MoveControl.itemDragStart(e, itemId);
-            }, false);
-        item.addEventListener("dragend", function(e){
+        }, false);
+        item.addEventListener("dragend", function (e) {
             MoveControl.itemDragEnd(e, itemId);
-            }, false);
-        item.addEventListener("dragenter", function(e){
+        }, false);
+        item.addEventListener("dragenter", function (e) {
             MoveControl.itemDragEnter(e, itemId);
-            }, false);
-        item.addEventListener("dragover", function(e){
+        }, false);
+        item.addEventListener("dragover", function (e) {
             MoveControl.itemDragOver(e, itemId);
-            }, false);
-        item.addEventListener("dragleave", function(e){
+        }, false);
+        item.addEventListener("dragleave", function (e) {
             MoveControl.itemDragLeave(e, itemId);
-            }, false);
-        item.addEventListener("drop", function(e){
+        }, false);
+        item.addEventListener("drop", function (e) {
             MoveControl.itemDrop(e, itemId);
-            }, false);
+        }, false);
 
         return item;
     }
 
-    const MoveControl = function(){
+    const MoveControl = function () {
 
         let draggedID = null;
 
-        function itemDragStart(e, itemId){
+        function itemDragStart(e, itemId) {
             draggedID = itemId;
             e.target.classList.add("dragged");
             e.dataTransfer.setData('text', itemId);
         }
-        
-        function itemDragEnd(e, itemId){
+
+        function itemDragEnd(e, itemId) {
             e.target.classList.remove("dragged");
             draggedID = null;
         }
-        
-        
-        
-        function itemDragEnter(e, itemId){
+
+
+
+        function itemDragEnter(e, itemId) {
             //e.target.classList.add("dragged-over")
-        
-            if (!(draggedID == itemId)){
-            moveVideoPerformed(draggedID, itemId);
+
+            if (!(draggedID == itemId)) {
+                moveVideoPerformed(draggedID, itemId);
             }
         }
-        
-        function itemDragOver(e, itemId){
+
+        function itemDragOver(e, itemId) {
             event.preventDefault();
         }
-        
-        function itemDragLeave(e, itemId){
+
+        function itemDragLeave(e, itemId) {
             //e.target.classList.remove("dragged-over");
         }
-        
-        function itemDrop(e, itemId){
-            if (draggedID != null){
-            e.preventDefault();
-        
-            moveVideoPerformed(draggedID, itemId);
+
+        function itemDrop(e, itemId) {
+            if (draggedID != null) {
+                e.preventDefault();
+
+                moveVideoPerformed(draggedID, itemId);
             }
         }
 
@@ -282,75 +290,83 @@ const PlayerController = function() {
 
 
     return {
-        setBackEnd:setBackEnd,
-        
-        // requests
-        play:play,
-        pause:pause,
-        seekTo:seekTo,
-        loadVideo:loadVideo,
-
-        // actions
-        stateChange:stateChange,
-        timeChange:timeChange,
-        videoChange:videoChange,
+        setBackEnd: setBackEnd,
 
         // requests
-        forwardClicked:forwardClicked,
-        backwardClicked:backwardClicked,
-        cueAt:cueAt,
-        cueAfterCurrent:cueAfterCurrent,
-        cueEnd:cueEnd,
-        playVideoClicked:playVideoClicked,
-        removeVideoClicked:removeVideoClicked,
-        moveVideoPerformed:moveVideoPerformed,
+        play: play,
+        pause: pause,
+        seekTo: seekTo,
+        loadVideo: loadVideo,
 
         // actions
-        addAfter:addAfter,
-        addBefore:addBefore,
-        removeVideo:removeVideo,
-        moveVideoBefore:moveVideoBefore
+        stateChange: stateChange,
+        timeChange: timeChange,
+        videoChange: videoChange,
+
+        // requests
+        forwardClicked: forwardClicked,
+        backwardClicked: backwardClicked,
+        cueAt: cueAt,
+        cueAfterCurrent: cueAfterCurrent,
+        cueEnd: cueEnd,
+        playVideoClicked: playVideoClicked,
+        removeVideoClicked: removeVideoClicked,
+        moveVideoPerformed: moveVideoPerformed,
+
+        // actions
+        addAfter: addAfter,
+        addBefore: addBefore,
+        removeVideo: removeVideo,
+        moveVideoBefore: moveVideoBefore
 
     };
 
 
-    function updateText(videoData){
-        if (videoData != null){
-          let title = videoData.snippet.title;
-          document.title = title;
-          qs("#player_info .title").innerText = title;
+    function updateText(videoData) {
+        if (videoData != null) {
+            let title = videoData.snippet.title;
+            document.title = title;
+            qs("#player_info .title").innerText = title;
         }
     }
 
-    function updatePlayButton(state){
+    function updatePlayButton(state) {
         let btn = qs("#play_button")
-        if (state == 0){
-          // not playing
-          btn.classList.remove("fa-pause");
-          btn.classList.add("fa-play");
-    
-        }else if (state == 1){
-          // playing
-          btn.classList.remove("fa-play");
-          btn.classList.add("fa-pause");
-    
+        if (state == 0) {
+            // not playing
+            btn.classList.remove("fa-pause");
+            btn.classList.add("fa-play");
+
+        } else if (state == 1) {
+            // playing
+            btn.classList.remove("fa-play");
+            btn.classList.add("fa-pause");
+
         }
     }
 
-    function updateTimebar(currentTime, duration){
-        $("player_timebar").value = ((currentTime/duration)*TIMEBARMAX);
-    }    
-
-    function setCurrent(itemId){
-
+    function updateTimebar(currentTime, duration) {
+        $("player_timebar").value = ((currentTime / duration) * TIMEBARMAX);
     }
-    
-      /**
-       * Scrolls the view to the current video.
-       */
-    function scrollToCurrent(){
+
+    function setCurrent(itemId) {
+        let old = qsa("#player_playlist>.list>.list_item.current_video");
+        old.forEach(o => {
+            o.classList.remove("current_video");
+        });
+
+        let newCurrent = domMap.get(itemId);
+        if (newCurrent) {
+            newCurrent.classList.add("current_video");
+        }
+    }
+
+    /**
+     * Scrolls the view to the current video.
+     */
+    function scrollToCurrent() {
         domMap.get(playlistOrder[current]).scrollIntoView();
     }
-    
+
 }();
 
